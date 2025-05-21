@@ -10,7 +10,7 @@ app.use(express.json());
 mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://karolamejia08:828k505@cluster0.m0tsh8c.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0');
 
 const citaRoutes = require('./routes/citas');
-app.use('/api/citas', citaRoutes);
+app.use('/citas', citaRoutes);
 
 app.get('/', (req, res) => res.send('API funcionando'));
 
