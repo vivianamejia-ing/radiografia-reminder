@@ -7,7 +7,7 @@ document.getElementById('citaForm').addEventListener('submit', async (e) => {
     fecha: document.getElementById('fecha').value
   };
 
-  const res = await fetch('https://radiografia-backend.onrender.com', {
+  const res = await fetch('https://radiografia-backend.onrender.com/api/citas', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
