@@ -1,14 +1,13 @@
 {
-  "name": "radiografia-reminder",
+  "name": "radiografia-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "backend/index.js",
   "scripts": {
     "start": "node backend/index.js"
   },
   "dependencies": {
-    "cors": "^2.8.5",
-    "dotenv": "^16.0.3",
     "express": "^4.18.2",
-    "mongoose": "^7.0.4"
+    "mongoose": "^7.0.4",
+    "nodemailer": "^6.9.3"
   }
 }
