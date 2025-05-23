@@ -12,6 +12,11 @@ const transporter = nodemailer.createTransport({
 });
 
 async function enviarCorreo(destinatario, asunto, mensaje) {
+  if (!destinatario) {
+    console.error('❌ Error: destinatario no definido');
+    return { success: false, error: 'Destinatario no definido' };
+  }
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: destinatario,
@@ -21,10 +26,10 @@ async function enviarCorreo(destinatario, asunto, mensaje) {
 
   try {
     const info = await transporter.sendMail(mailOptions);
-    console.log('Correo enviado:', info.response);
+    console.log('✅ Correo enviado:', info.response);
     return { success: true, info };
   } catch (error) {
-    console.error('Error al enviar correo:', error);
+    console.error('❌ Error al enviar correo:', error);
     return { success: false, error };
   }
 }
