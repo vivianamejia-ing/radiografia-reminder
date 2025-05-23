@@ -13,6 +13,7 @@ router.post('/', async (req, res) => {
     await nuevaCita.save();
 
     // Enviar correo de recordatorio
+    console.log("correo del paciente:", correoPaciente)
     await enviarCorreo(
       correoPaciente,
       'Recordatorio de cita',
