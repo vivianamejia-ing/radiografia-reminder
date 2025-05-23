@@ -1,31 +1,28 @@
-const express = require('express');
-const router = express.Router();
-const Cita = require('../models/Cita');
-const enviarCorreo = require('../mailer'); // :apuntando_hacia_la_izquierda: Importamos la función
-// Crear una cita
-router.post('/', async (req, res) => {
-  const { nombrePaciente, correoPaciente, fecha } = req.body;
-  try {
-    // Guardar la cita en MongoDB
-    const nuevaCita = new Cita({ nombrePaciente, correoPaciente, fecha });
-    await nuevaCita.save();
-    // Enviar correo de recordatorio
-    console.log("correo del paciente:", correoPaciente)
-    await enviarCorreo(
-      correoPaciente,
-      'Recordatorio de cita',
-      `Hola ${nombrePaciente}, tu cita está agendada para el ${fecha}.`
-    );
-    console.log(':marca_de_verificación_blanca: Cita guardada y correo enviado');
-    res.send('Cita guardada y correo enviado');
-  } catch (error) {
-    console.error(':x: Error al guardar cita o enviar correo:', error);
-    res.status(500).send('Error al guardar cita o enviar correo');
+// backend/mailer.js
+const nodemailer = require('nodemailer');
+const { getMaxListeners } = require('nodemailer/lib/xoauth2');
+require('dotenv').config(); // Para usar variables de entorno
+const transporter = nodemailer.createTransport({
+  service: 'gmail', // Puedes cambiar esto si usas otro correo (hotmail, outlook, etc.)
+  auth: {
+    user: process.env.EMAIL_USER, // Se lee de tus variables de entorno
+    pass: process.env.EMAIL_PASS
   }
 });
-// Obtener todas las citas
-router.get('/', async (req, res) => {
-  const citas = await Cita.find();
-  res.json(citas);
-});
-module.exports = router;
+async function enviarCorreo(destinatario, asunto, mensaje) {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: destinatario,
+    subject: asunto,
+    text: mensaje
+  };
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Correo enviado:', info.response);
+    return { success: true, info };
+  } catch (error) {
+    console.error('Error al enviar correo:', error);
+    return { success: false, error };
+  }
+}
+module.exports = enviarCorreo;
