@@ -5,73 +5,76 @@ const enviarCorreo = require('../mailer');
 
 // Crear una cita
 router.post('/', async (req, res) => {
-  // Extraer y validar datos del cuerpo de la solicitud
+  // Extraer datos del cuerpo de la solicitud
   const { nombrePaciente, correoPaciente, fecha } = req.body;
 
-  // Validación exhaustiva de los datos de entrada
-  if (!nombrePaciente || !nombrePaciente.trim()) {
-    return res.status(400).json({ error: 'El nombre del paciente es requerido' });
+  // Validaciones
+  if (!nombrePaciente || typeof nombrePaciente !== 'string') {
+    return res.status(400).json({ error: 'Nombre del paciente es requerido y debe ser texto' });
   }
 
-  if (!correoPaciente || !correoPaciente.trim()) {
-    return res.status(400).json({ error: 'El correo del paciente es requerido' });
+  if (!correoPaciente || typeof correoPaciente !== 'string') {
+    return res.status(400).json({ error: 'Correo electrónico es requerido y debe ser texto' });
   }
 
-  if (!fecha || !fecha.trim()) {
-    return res.status(400).json({ error: 'La fecha de la cita es requerida' });
+  if (!fecha || typeof fecha !== 'string') {
+    return res.status(400).json({ error: 'Fecha es requerida y debe ser texto' });
   }
 
-  // Validación básica de formato de email
+  // Validar formato de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(correoPaciente)) {
-    return res.status(400).json({ error: 'El correo electrónico no tiene un formato válido' });
+    return res.status(400).json({ error: 'Formato de correo electrónico inválido' });
   }
 
   try {
-    // Guardar la cita en MongoDB
-    const nuevaCita = new Cita({ 
+    // Crear y guardar la cita
+    const nuevaCita = new Cita({
       nombrePaciente: nombrePaciente.trim(),
       correoPaciente: correoPaciente.trim(),
       fecha: fecha.trim()
     });
-    
+
     await nuevaCita.save();
 
-    console.log("Correo del paciente:", correoPaciente);
-    
-    // Enviar correo de recordatorio
+    // Intentar enviar el correo (pero no fallar si hay error)
     try {
       await enviarCorreo(
         correoPaciente.trim(),
-        'Recordatorio de cita',
-        `Hola ${nombrePaciente.trim()}, tu cita está agendada para el ${fecha.trim()}.`
+        'Confirmación de Cita',
+        `Hola ${nombrePaciente.trim()},\n\nTu cita ha sido agendada para el ${fecha.trim()}.\n\nGracias por confiar en nosotros.`
       );
-      console.log('✅ Correo enviado exitosamente');
-      
-      res.status(201).json({
-        success: true,
-        message: 'Cita creada y correo enviado exitosamente',
-        cita: nuevaCita
-      });
+      console.log('Correo enviado exitosamente');
     } catch (emailError) {
-      console.error('⚠️ Error al enviar el correo:', emailError);
-      // Respondemos que la cita se creó pero el correo falló
-      res.status(201).json({
-        success: true,
-        message: 'Cita creada pero falló el envío del correo',
-        cita: nuevaCita,
-        warning: 'No se pudo enviar el correo de confirmación'
-      });
+      console.warn('El correo no pudo ser enviado:', emailError);
     }
-  } catch (dbError) {
-    console.error('❌ Error al guardar la cita:', dbError);
+
+    // Respuesta exitosa
+    res.status(201).json({
+      success: true,
+      message: 'Cita agendada exitosamente',
+      cita: nuevaCita
+    });
+
+  } catch (error) {
+    console.error('Error al agendar la cita:', error);
     res.status(500).json({
       success: false,
-      error: 'Error al guardar la cita',
-      details: dbError.message
+      error: 'Error interno al agendar la cita',
+      details: error.message
     });
   }
 });
 
-// Resto de tus rutas...
+// Obtener todas las citas
+router.get('/', async (req, res) => {
+  try {
+    const citas = await Cita.find().sort({ fecha: 1 }); // Ordenar por fecha
+    res.json(citas);
+  } catch (error) {
+    console.error('Error al obtener citas:', error);
+    res.status(500).json({ error: 'Error al obtener citas' });
+  }
+});
+
 module.exports = router;
