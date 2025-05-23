@@ -6,7 +6,7 @@ require('dotenv').config(); // Para usar variables de entorno
 const transporter = nodemailer.createTransport({
   service: 'gmail', // Puedes cambiar esto si usas otro correo (hotmail, outlook, etc.)
   auth: {
-    user: process.env.EMAIL_USER=cuno3235@gmail.com, // Se lee de tus variables de entorno
+    user: process.env.EMAIL_USER="cuno3235@gmail.com", // Se lee de tus variables de entorno
     pass: process.env.EMAIL_PASS=fbvpjnjleborlfug
   }
 });
