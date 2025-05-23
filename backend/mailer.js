@@ -11,6 +11,8 @@ const transporter = nodemailer.createTransport({
 });
 
 function enviarCorreo(destinatario, asunto, mensaje) {
+  console.log('Enviando correo a:', destinatario); // <-- Agrega esto
+
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: destinatario,
@@ -18,7 +20,8 @@ function enviarCorreo(destinatario, asunto, mensaje) {
     text: mensaje
   };
 
-  return transporter.sendMail(mailOptions); // Esto envía el correo
+  return transporter.sendMail(mailOptions);
 }
+
 
 module.exports = enviarCorreo;
