@@ -1,55 +1,32 @@
+// backend/mailer.js
 const nodemailer = require('nodemailer');
-require('dotenv').config();
-
-// Configuración mejorada del transporter
+const { getMaxListeners } = require('nodemailer/lib/xoauth2');
+require('dotenv').config(); // Para usar variables de entorno
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true, // true for 465, false for other ports
+  service: 'gmail', // Puedes cambiar esto si usas otro correo (hotmail, outlook, etc.)
   auth: {
-    user: process.env.EMAIL_USER,
+    user: process.env.EMAIL_USER, // Se lee de tus variables de entorno
     pass: process.env.EMAIL_PASS
-  },
-  tls: {
-    rejectUnauthorized: false // Solo para desarrollo, quitar en producción
   }
 });
-
-// Función mejorada para enviar correos
 async function enviarCorreo(destinatario, asunto, mensaje) {
-  // Validación del destinatario
-  if (!destinatario || typeof destinatario !== 'string') {
-    console.error('Error: Destinatario no válido');
-    return { success: false, error: 'Destinatario no válido' };
+  if (!destinatario) {
+    console.error(':x: Error: destinatario no definido');
+    return { success: false, error: 'Destinatario no definido' };
   }
-
   const mailOptions = {
-    from: `"Sistema de Citas" <${process.env.EMAIL_USER}>`,
+    from: process.env.EMAIL_USER,
     to: destinatario,
     subject: asunto,
-    text: mensaje,
-    html: `<p>${mensaje.replace(/\n/g, '<br>')}</p>` // Versión HTML
+    text: mensaje
   };
-
   try {
-    // Verificación de la conexión SMTP primero
-    await transporter.verify();
-    console.log('Servidor SMTP configurado correctamente');
-
-    // Envío del correo
     const info = await transporter.sendMail(mailOptions);
-    console.log('Correo enviado:', info.messageId);
-    console.log('URL de vista previa:', nodemailer.getTestMessageUrl(info));
-    
+    console.log(':marca_de_verificación_blanca: Correo enviado:', info.response);
     return { success: true, info };
   } catch (error) {
-    console.error('Error detallado al enviar correo:', {
-      message: error.message,
-      stack: error.stack,
-      response: error.response
-    });
+    console.error(':x: Error al enviar correo:', error);
     return { success: false, error };
   }
 }
-
 module.exports = enviarCorreo;
