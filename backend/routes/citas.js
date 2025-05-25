@@ -5,32 +5,23 @@ const enviarCorreo = require('../mailer'); // 👈 Importamos la función
 
 // Crear una cita
 router.post('/', async (req, res) => {
-  const { nombrePaciente, correoPaciente, fecha } = req.body;
-
+  console.log('📥 Datos recibidos en POST /api/citas:', req.body); // 👈 AÑADE ESTA LÍNEA
   try {
-    // Guardar la cita en MongoDB
-    const nuevaCita = new Cita({ nombrePaciente, correoPaciente, fecha });
+    const nuevaCita = new Cita(req.body);
     await nuevaCita.save();
 
-    // Enviar correo de recordatorio
-    await enviarCorreo(
-      correoPaciente,
-      'Recordatorio de cita',
-      `Hola ${nombrePaciente}, tu cita está agendada para el ${fecha}.`
-    );
+    const destinatario = req.body.email;
+    const asunto = 'Confirmación de cita';
+    const mensaje = `Hola ${req.body.nombre}, tu cita ha sido agendada para el ${req.body.fecha}.`;
 
-    console.log('✅ Cita guardada y correo enviado');
-    res.send('Cita guardada y correo enviado');
+    await enviarCorreo(destinatario, asunto, mensaje);
+
+    res.status(200).send('Cita guardada y correo enviado');
   } catch (error) {
     console.error('❌ Error al guardar cita o enviar correo:', error);
     res.status(500).send('Error al guardar cita o enviar correo');
   }
 });
 
-// Obtener todas las citas
-router.get('/', async (req, res) => {
-  const citas = await Cita.find();
-  res.json(citas);
-});
 
 module.exports = router;
