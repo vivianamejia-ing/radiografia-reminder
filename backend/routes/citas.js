@@ -12,7 +12,7 @@ router.post('/', async (req, res) => {
 
     const destinatario = req.body.email;
     const asunto = 'Confirmación de cita';
-    const mensaje = `Hola ${req.body.nombre}, tu cita ha sido agendada para el ${req.body.fecha}.`;
+    const mensaje = `Hola ${req.body.nombre}, tu cita de radiología ha sido agendada para el ${req.body.fecha}.`;
 
     await enviarCorreo(destinatario, asunto, mensaje);
 
