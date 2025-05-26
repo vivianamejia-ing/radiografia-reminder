@@ -1,7 +1,7 @@
 {
   "name": "radiografia-reminder",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "backend/index.js",
   "scripts": {
     "start": "node backend/index.js"
   },
